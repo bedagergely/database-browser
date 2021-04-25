@@ -12,6 +12,6 @@ public interface DataBaseDAO {
     public List<Table> findAllTables(DataBase db);
     public List<Column> findAllColumns(DataBase db, Table table);
     public List<TableItem> findAllItems(DataBase db, Table table);
-    public void findTableScheme(DataBase db, Table table);
+    public String findTableScheme(DataBase db, Table table);
 
 }

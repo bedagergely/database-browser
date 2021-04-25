@@ -3,12 +3,14 @@ package hu.bp3sjt.model;
 import javafx.beans.property.*;
 import javafx.collections.ObservableList;
 
+import java.util.List;
+
 public class Table {
 
     private StringProperty name = new SimpleStringProperty(this, "name");
     private ObjectProperty<DataBase> parent = new SimpleObjectProperty<>(this, "parent");
     private ObjectProperty<ObservableList<Column>> columns = new SimpleObjectProperty<>(this, "columns");
-    private ObjectProperty<TableItem> item = new SimpleObjectProperty<>(this, "item");
+    private StringProperty schema = new SimpleStringProperty(this, "schema");
 
     public String getName() {
         return name.get();
@@ -51,16 +53,15 @@ public class Table {
         return name.get();
     }
 
-    public TableItem getItem() {
-        return item.get();
+    public String getSchema() {
+        return schema.get();
     }
 
-    public ObjectProperty<TableItem> itemProperty() {
-        return item;
+    public StringProperty schemaProperty() {
+        return schema;
     }
 
-    public void setItem(TableItem item) {
-        item.setParent(this);
-        this.item.set(item);
+    public void setSchema(String schema) {
+        this.schema.set(schema);
     }
 }

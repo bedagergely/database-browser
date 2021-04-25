@@ -4,11 +4,7 @@ import hu.bp3sjt.model.Column;
 import hu.bp3sjt.model.DataBase;
 import hu.bp3sjt.model.Table;
 import hu.bp3sjt.model.TableItem;
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
-import javafx.collections.ObservableList;
+
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -30,6 +26,7 @@ public class DataBaseDaoImp implements DataBaseDAO{
                 Table table = new Table();
                 table.setName(tableName);
                 table.setParent(db);
+                table.setSchema(this.findTableScheme(db, table));
                 result.add(table);
             }
 
@@ -74,6 +71,7 @@ public class DataBaseDaoImp implements DataBaseDAO{
             ResultSet resultSet = statement.executeQuery(String.format(SELECT_ALL_ITEMS, table.getName()));
             while (resultSet.next()){
                 TableItem tableItem = new TableItem();
+                tableItem.setParent(table);
                 for (int i = 1; i <= table.getColumns().size(); i++){
                     tableItem.getFields().add(resultSet.getString(i));
                 }
@@ -86,24 +84,21 @@ public class DataBaseDaoImp implements DataBaseDAO{
     }
 
     @Override
-    public void findTableScheme(DataBase db, Table table) {
+    public String findTableScheme(DataBase db, Table table) {
         try (Connection connection = DriverManager.getConnection(db.getUrl())){
 
             PreparedStatement preparedStatement = connection.prepareStatement(FIND_TABLE_SCHEMA);
             preparedStatement.setString(1, table.getName());
 
             ResultSet resultSet = preparedStatement.executeQuery();
+            resultSet.next();
+            String schema = resultSet.getString("sql");
 
-            while (resultSet.next()) {
-                System.out.println(resultSet.getString(1));
-                System.out.println(resultSet.getString(2));
-                System.out.println(resultSet.getString(3));
-                System.out.println(resultSet.getInt(4));
-                System.out.println(resultSet.getString("sql"));
-            }
+            return schema;
 
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        return null;
     }
 }

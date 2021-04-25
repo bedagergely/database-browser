@@ -1,24 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
-<?import javafx.scene.text.*?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.BorderPane?>
 
-<BorderPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="hu.bp3sjt.controller.MainWindowController">
+<BorderPane fx:id="borderPane" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/11" xmlns:fx="http://javafx.com/fxml/1" fx:controller="hu.bp3sjt.controller.MainWindowController">
    <top>
       <MenuBar BorderPane.alignment="CENTER">
         <menus>
           <Menu mnemonicParsing="false" text="File">
             <items>
-                  <MenuItem mnemonicParsing="false" onAction="#onOpenDatabase" text="Open database" />
-                  <MenuItem mnemonicParsing="false" text="Close database" />
+                  <MenuItem mnemonicParsing="false" onAction="#onOpenDataBase" text="Open database" />
+                  <MenuItem mnemonicParsing="false" onAction="#onCloseDataBase" text="Close database" />
               <MenuItem mnemonicParsing="false" onAction="#onExit" text="Exit" />
             </items>
           </Menu>
-          <Menu mnemonicParsing="false" text="Edit">
+          <Menu mnemonicParsing="false" text="View">
             <items>
-              <MenuItem mnemonicParsing="false" text="Delete" />
+                  <MenuItem mnemonicParsing="false" onAction="#onNormalMenu" text="Normal" />
+              <MenuItem mnemonicParsing="false" onAction="#onEditMenu" text="Edit" />
+                  <MenuItem mnemonicParsing="false" onAction="#onSQLMenu" text="SQL" />
             </items>
           </Menu>
           <Menu mnemonicParsing="false" text="Help">
@@ -29,26 +34,18 @@
         </menus>
       </MenuBar>
    </top>
-   <left>
-      <VBox prefHeight="200.0" prefWidth="100.0" BorderPane.alignment="CENTER">
-         <children>
-            <Label fx:id="dbNameLabel" alignment="CENTER" maxWidth="1.7976931348623157E308" textAlignment="CENTER">
-               <VBox.margin>
-                  <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
-               </VBox.margin>
-               <font>
-                  <Font name="System Bold" size="20.0" />
-               </font></Label>
-            <Separator prefHeight="0.0" prefWidth="100.0" />
-            <ListView fx:id="tableListView" prefHeight="331.0" prefWidth="100.0" />
-         </children>
-      </VBox>
-   </left>
    <center>
-      <ScrollPane fx:id="scrollPane" fitToHeight="true" fitToWidth="true" BorderPane.alignment="CENTER">
+      <ScrollPane fx:id="scrollPane" fitToHeight="true" fitToWidth="true" prefWidth="525.0" BorderPane.alignment="CENTER">
          <content>
-            <TableView fx:id="columnsTableView" prefHeight="100" prefWidth="100" />
+            <TableView fx:id="columnsTableView" prefHeight="100.0" prefWidth="407.0" />
          </content>
       </ScrollPane>
    </center>
+   <left>
+      <ScrollPane fitToHeight="true" fitToWidth="true" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="314.0" prefWidth="101.0" BorderPane.alignment="CENTER">
+         <content>
+            <ListView fx:id="tableListView" maxHeight="-Infinity" maxWidth="-Infinity" />
+         </content>
+      </ScrollPane>
+   </left>
 </BorderPane>
