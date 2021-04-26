@@ -6,6 +6,7 @@ import hu.bp3sjt.model.Table;
 import hu.bp3sjt.model.TableItem;
 import javafx.collections.ObservableList;
 
+import java.sql.ResultSet;
 import java.util.List;
 
 public interface DataBaseDAO {
@@ -17,5 +18,5 @@ public interface DataBaseDAO {
     Boolean updateTable(DataBase db, TableItem oldItem, TableItem newItem, ObservableList<Column> columns);
     Boolean insertIntoTable(DataBase db, TableItem tableItem, ObservableList<Column> columns);
     void deleteItem(DataBase db, TableItem tableItem);
-
+    ResultSet executeSQL(DataBase db, String sql);
 }

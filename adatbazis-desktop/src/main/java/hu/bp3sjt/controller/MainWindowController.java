@@ -20,6 +20,8 @@ import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -30,6 +32,9 @@ import javafx.util.Callback;
 
 import java.io.File;
 import java.net.URL;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -69,9 +74,7 @@ public class MainWindowController implements Initializable {
             dataBase = new DataBase();
             dataBase.setUrl(selectedFile.getAbsolutePath());
             dataBase.setName(selectedFile.getName());
-            List<Table> tables = dao.findAllTables(dataBase);
-            dataBase.setTables(FXCollections.observableArrayList(tables));
-            tableListView.itemsProperty().bind(dataBase.tablesProperty());
+            refreshTableList();
             App.setStageTitle(dataBase.getName());
         }
     }
@@ -122,13 +125,16 @@ public class MainWindowController implements Initializable {
 
     public void onCloseDataBase(ActionEvent actionEvent) {
         dataBase = null;
+        App.setStageTitle("");
         tableListView.getItems().removeAll(tableListView.getItems());
         columnsTableView.getItems().removeAll(columnsTableView.getItems());
     }
 
     public void onEditMenu(ActionEvent actionEvent) {
         if(borderPane.leftProperty().isNull().get())  borderPane.leftProperty().set(leftSideNode);
+        if(dataBase != null) refreshTableList();
         borderPane.bottomProperty().set(null);
+
         VBox rightVbox = new VBox();
         Button editButton = new Button("Edit");
         Button deleteButton = new Button("Delete");
@@ -164,19 +170,59 @@ public class MainWindowController implements Initializable {
         borderPane.rightProperty().set(null);
         borderPane.bottomProperty().set(null);
         if(leftSideNode != null) borderPane.leftProperty().set(leftSideNode);
+        if(dataBase != null) refreshTableList();
     }
 
     public void onSQLMenu(ActionEvent actionEvent) {
         borderPane.rightProperty().set(null);
         leftSideNode = borderPane.leftProperty().get();
         borderPane.leftProperty().set(null);
+        columnsTableView.getItems().removeAll(columnsTableView.getItems());
+        columnsTableView.getColumns().removeAll(columnsTableView.getColumns());
 
         VBox bottomVbox = new VBox();
         TextArea sqlText = new TextArea();
 
         bottomVbox.getChildren().add(sqlText);
-
         borderPane.setBottom(bottomVbox);
+
+        sqlText.addEventHandler(KeyEvent.KEY_PRESSED, keyEvent -> {
+            if(dataBase != null && keyEvent.getCode() == KeyCode.F5){
+                columnsTableView.getItems().removeAll(columnsTableView.getItems());
+                columnsTableView.getColumns().removeAll(columnsTableView.getColumns());
+               ResultSet resultSet = dao.executeSQL(dataBase, sqlText.getText());
+               if(resultSet == null){
+                   showDataBaseError();
+               }else{
+                   try{
+                       ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
+                       int columnCount = resultSetMetaData.getColumnCount();
+                       List<String> columnNames = FXCollections.observableArrayList();
+                       for(int i = 1; i <= columnCount; i++){
+                           String cname = resultSetMetaData.getColumnName(i);
+                           columnNames.add(cname);
+                       }
+
+                       for(int i = 0; i < columnCount; i++){
+                           TableColumn tableColumn = new TableColumn<TableItem, String>(columnNames.get(i));
+                           tableColumn.setMinWidth(80);
+                           final int index = i;
+                           tableColumn.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<TableItem, String>, ObservableValue<String>>() {
+                               @Override
+                               public ObservableValue call(TableColumn.CellDataFeatures param) {
+                                   return new SimpleStringProperty(((TableItem)param.getValue()).getFields().get(index));
+                               }
+                           });
+                           columnsTableView.getColumns().add(tableColumn);
+                       }
+
+                       resultSet.close();
+                   } catch (SQLException e) {
+                       e.printStackTrace();
+                   }
+               }
+            }
+        });
     }
 
     private void showDeleteItem() {
@@ -244,10 +290,7 @@ public class MainWindowController implements Initializable {
             if(done){
                 columnsTableView.getItems().add(newItem);
             }else {
-                Alert alert = new Alert(Alert.AlertType.ERROR,  null, ButtonType.OK);
-                alert.setTitle("SQL ERROR");
-                alert.setHeaderText(dataBase.getErrorMessage());
-                alert.showAndWait();
+                showDataBaseError();
             }
             stage.close();
         });
@@ -343,5 +386,18 @@ public class MainWindowController implements Initializable {
         stage.setScene(scene);
         stage.setResizable(false);
         stage.showAndWait();
+    }
+
+    private void showDataBaseError(){
+        Alert alert = new Alert(Alert.AlertType.ERROR,  null, ButtonType.OK);
+        alert.setTitle("SQL ERROR");
+        alert.setHeaderText(dataBase.getErrorMessage());
+        alert.showAndWait();
+    }
+
+    private void refreshTableList() {
+        List<Table> tables = dao.findAllTables(dataBase);
+        dataBase.setTables(FXCollections.observableArrayList(tables));
+        tableListView.itemsProperty().bind(dataBase.tablesProperty());
     }
 }

@@ -207,4 +207,22 @@ public class DataBaseDaoImp implements DataBaseDAO{
         }
         return true;
     }
+
+    @Override
+    public ResultSet executeSQL(DataBase db, String sql) {
+        try{
+            Connection connection = DriverManager.getConnection(db.getUrl());
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery(sql);
+            return resultSet;
+        } catch (SQLException e) {
+            if(e.getErrorCode() == 101){
+                //No resultSet
+            }else {
+                e.printStackTrace();
+            }
+            db.setErrorMessage(e.getMessage());
+            return null;
+        }
+    }
 }
