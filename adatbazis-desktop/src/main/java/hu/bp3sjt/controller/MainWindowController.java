@@ -11,21 +11,18 @@ import javafx.application.Platform;
 import javafx.beans.binding.StringBinding;
 import javafx.beans.binding.When;
 import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.scene.text.TextAlignment;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -35,14 +32,15 @@ import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.ResourceBundle;
 
 public class MainWindowController implements Initializable {
 
 
     private DataBase dataBase;
-    private DataBaseDAO dao = new DataBaseDaoImp();
-    private Node leftSideNode;
+    private final DataBaseDAO dao = new DataBaseDaoImp();
+    private Node leftSideNode = null;
     private Table selectedTable;
     private TableItem selectedTableItem;
 
@@ -95,7 +93,7 @@ public class MainWindowController implements Initializable {
         tableListView.getSelectionModel().selectedItemProperty().addListener((observable, oldTable, newTable)->{
             if (newTable == null || dataBase == null){
                 columnsTableView.getColumns().removeAll(columnsTableView.getColumns());
-            }else if(dataBase != null){
+            }else if(dataBase != null && newTable != oldTable){
                 columnsTableView.getColumns().removeAll(columnsTableView.getColumns());
                 selectedTable = newTable;
                 List<Column> columns = dao.findAllColumns(dataBase, newTable);
@@ -149,9 +147,11 @@ public class MainWindowController implements Initializable {
         });
 
         deleteButton.setOnAction(actionEvent1 -> {
+            showDeleteItem();
         });
 
         addButton.setOnAction(actionEvent1 -> {
+            showAddItem();
         });
 
         rightVbox.setSpacing(20);
@@ -163,7 +163,7 @@ public class MainWindowController implements Initializable {
     public void onNormalMenu(ActionEvent actionEvent) {
         borderPane.rightProperty().set(null);
         borderPane.bottomProperty().set(null);
-        borderPane.leftProperty().set(leftSideNode);
+        if(leftSideNode != null) borderPane.leftProperty().set(leftSideNode);
     }
 
     public void onSQLMenu(ActionEvent actionEvent) {
@@ -179,6 +179,86 @@ public class MainWindowController implements Initializable {
         borderPane.setBottom(bottomVbox);
     }
 
+    private void showDeleteItem() {
+        if(selectedTable == null || selectedTableItem == null) return;
+
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION, null, ButtonType.YES, ButtonType.NO);
+        confirm.setTitle("Are you sure you want to delete?");
+        confirm.setHeaderText("Are you sure you want to delete?");
+
+        Optional<ButtonType> answer = confirm.showAndWait();
+
+        if (answer.get() == ButtonType.YES) {
+            dao.deleteItem(dataBase, selectedTableItem);
+            columnsTableView.getItems().remove(selectedTableItem);
+        }
+    }
+
+    private void showAddItem() {
+        if(selectedTable == null) return;
+
+        Stage stage = new Stage();
+        stage.initModality(Modality.APPLICATION_MODAL);
+        VBox root = new VBox();
+        HBox main = new HBox();
+        VBox left = new VBox();
+        VBox right = new VBox();
+
+        TableItem newItem = new TableItem();
+        newItem.setParent(selectedTable);
+
+        ObservableList<Column> columns = newItem.getParent().getColumns();
+        ObservableList<String> newItemFields = newItem.getFields();
+        List<TextField> textFields = new ArrayList<>();
+
+        for(int i = 0; i < columns.size(); i++){
+            Label label = new Label(columns.get(i).getName());
+            TextField textField = new TextField(columns.get(i).getdType());
+            textFields.add(textField);
+
+            label.minHeightProperty().bind(textField.heightProperty());
+
+            left.getChildren().add(label);
+            right.getChildren().add(textField);
+        }
+
+        Button save = new Button("Save");
+        Button cancel = new Button("Cancel");
+        HBox buttonBox = new HBox();
+        save.minWidthProperty().bind(main.widthProperty().divide(2).subtract(1));
+        cancel.minWidthProperty().bind(main.widthProperty().divide(2).subtract(1));
+
+        buttonBox.getChildren().addAll(save, cancel);
+        main.getChildren().addAll(left, right);
+        root.getChildren().addAll(main, buttonBox);
+
+        cancel.setOnAction(actionEvent -> {
+            stage.close();
+        });
+
+        save.setOnAction(actionEvent -> {
+            for(int i = 0; i < textFields.size(); i++){
+                newItemFields.add(textFields.get(i).getText());
+            }
+            Boolean done = dao.insertIntoTable(dataBase, newItem, columns);
+            if(done){
+                columnsTableView.getItems().add(newItem);
+            }else {
+                Alert alert = new Alert(Alert.AlertType.ERROR,  null, ButtonType.OK);
+                alert.setTitle("SQL ERROR");
+                alert.setHeaderText(dataBase.getErrorMessage());
+                alert.showAndWait();
+            }
+            stage.close();
+        });
+
+        Scene scene = new Scene(root);
+        stage.setTitle(selectedTable.getName());
+        stage.setScene(scene);
+        stage.setResizable(false);
+        stage.showAndWait();
+    }
+
     private void showEditItem(){
         if(selectedTable == null || selectedTableItem == null) return;
 
@@ -189,31 +269,55 @@ public class MainWindowController implements Initializable {
         VBox left = new VBox();
         VBox right = new VBox();
 
-        List<Label> labels = new ArrayList<>();
+        TableItem oldItem = selectedTableItem;
+        TableItem newItem = new TableItem();
+        newItem.setParent(selectedTableItem.getParent());
+
+        ObservableList<Column> columns = oldItem.getParent().getColumns();
+        ObservableList<String> newItemFields = newItem.getFields();
         List<TextField> textFields = new ArrayList<>();
-        ObservableList<Column> columns = selectedTable.getColumns();
 
         for(int i = 0; i < columns.size(); i++){
           Label label = new Label(columns.get(i).getName());
           TextField textField = new TextField(selectedTableItem.getFields().get(i));
+          textFields.add(textField);
 
           label.minHeightProperty().bind(textField.heightProperty());
 
           left.getChildren().add(label);
           right.getChildren().add(textField);
-          labels.add(label);
-          textFields.add(textField);
         }
 
-        Button ok = new Button("ok");
-        Button cancel = new Button("cancel");
+        Button save = new Button("Save");
+        Button cancel = new Button("Cancel");
         HBox buttonBox = new HBox();
-        ok.minWidthProperty().bind(main.widthProperty().divide(2).subtract(1));
+        save.minWidthProperty().bind(main.widthProperty().divide(2).subtract(1));
         cancel.minWidthProperty().bind(main.widthProperty().divide(2).subtract(1));
 
-        buttonBox.getChildren().addAll(ok, cancel);
+        buttonBox.getChildren().addAll(save, cancel);
         main.getChildren().addAll(left, right);
         root.getChildren().addAll(main, buttonBox);
+
+        cancel.setOnAction(actionEvent -> {
+            stage.close();
+        });
+
+        save.setOnAction(actionEvent -> {
+            for(int i = 0; i < textFields.size(); i++){
+                newItemFields.add(textFields.get(i).getText());
+            }
+            Boolean done = dao.updateTable(dataBase, oldItem, newItem, columns);
+            if(done){
+                columnsTableView.getItems().remove(oldItem);
+                columnsTableView.getItems().add(newItem);
+            }else {
+                Alert alert = new Alert(Alert.AlertType.ERROR,  null, ButtonType.OK);
+                alert.setTitle("SQL ERROR");
+                alert.setHeaderText(dataBase.getErrorMessage());
+                alert.showAndWait();
+            }
+            stage.close();
+        });
 
         Scene scene = new Scene(root);
         stage.setTitle(selectedTable.getName());

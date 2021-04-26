@@ -15,7 +15,7 @@ public class App extends Application {
 
     @Override
     public void start(Stage stage) {
-        this.stage = stage;
+        App.stage = stage;
         App.loadFXML("/fxml/main_window.fxml");
         stage.show();
     }

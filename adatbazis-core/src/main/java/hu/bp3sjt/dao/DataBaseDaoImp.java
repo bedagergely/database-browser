@@ -4,6 +4,7 @@ import hu.bp3sjt.model.Column;
 import hu.bp3sjt.model.DataBase;
 import hu.bp3sjt.model.Table;
 import hu.bp3sjt.model.TableItem;
+import javafx.collections.ObservableList;
 
 
 import java.sql.*;
@@ -45,11 +46,7 @@ public class DataBaseDaoImp implements DataBaseDAO{
             int index = 0;
             while (resultSet.next()){
                 String columnName = resultSet.getString("COLUMN_NAME");
-                String columnSize = resultSet.getString("COLUMN_SIZE");
-                String datatype = resultSet.getString("DATA_TYPE");
-                String isNullable = resultSet.getString("IS_NULLABLE");
-                String isAutoIncrement = resultSet.getString("IS_AUTOINCREMENT");
-
+                String datatype = resultSet.getString("TYPE_NAME");
                 Column column = new Column();
                 column.setName(columnName);
                 column.setdType(datatype);
@@ -100,5 +97,114 @@ public class DataBaseDaoImp implements DataBaseDAO{
             e.printStackTrace();
         }
         return null;
+    }
+
+    @Override
+    public Boolean updateTable(DataBase db, TableItem oldItem, TableItem newItem, ObservableList<Column> columns) {
+        try (Connection connection = DriverManager.getConnection(db.getUrl())){
+
+            String sql = String.format("UPDATE %s SET", oldItem.getParent().getName());
+            int i;
+            for(i = 0; i < columns.size(); i++){
+                if(i != columns.size()-1){
+                    sql += String.format(" %s = ?,", columns.get(i).getName());
+                }else {
+                    sql += String.format(" %s = ? WHERE", columns.get(i).getName());
+                }
+            }
+
+            for(i = 0; i < columns.size(); i++){
+                if(i != columns.size()-1){
+                    sql += String.format(" %s = ? AND", columns.get(i).getName());
+                }else {
+                    sql += String.format(" %s = ? ;", columns.get(i).getName());
+                }
+            }
+
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+
+            for(i = 1; i <= columns.size(); i++){
+                preparedStatement.setString(i, newItem.getFields().get(i-1));
+            }
+
+            for(i = columns.size()+1; i <= columns.size()*2; i++){
+                preparedStatement.setString(i, oldItem.getFields().get(i-columns.size()-1));
+            }
+            preparedStatement.executeUpdate();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            db.setErrorMessage(e.getMessage());
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public void deleteItem(DataBase db, TableItem tableItem) {
+        try (Connection connection = DriverManager.getConnection(db.getUrl())){
+            String sql = String.format("DELETE FROM %s WHERE", tableItem.getParent().getName());
+            List<Column> columns = tableItem.getParent().getColumns();
+
+            int i;
+            for(i = 0; i < columns.size(); i++){
+                if(i != columns.size()-1){
+                    sql += String.format(" %s = ? AND", columns.get(i).getName());
+                }else {
+                    sql += String.format(" %s = ? ;", columns.get(i).getName());
+                }
+            }
+
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+
+            for(i = 1; i <= columns.size(); i++){
+                preparedStatement.setString(i, tableItem.getFields().get(i-1));
+            }
+
+            preparedStatement.executeUpdate();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public Boolean insertIntoTable(DataBase db, TableItem tableItem, ObservableList<Column> columns) {
+        try (Connection connection = DriverManager.getConnection(db.getUrl())){
+
+            String sql = String.format("INSERT INTO %s(", tableItem.getParent().getName());
+            int i;
+            for(i = 0; i < columns.size(); i++){
+                if(i != columns.size()-1){
+                    sql += String.format(" %s,", columns.get(i).getName());
+                }else {
+                    sql += String.format(" %s)", columns.get(i).getName());
+                }
+            }
+
+            sql += "VALUES(";
+
+            for(i = 0; i < columns.size(); i++){
+                if(i != columns.size()-1){
+                    sql += "?,";
+                }else {
+                    sql += "?);";
+                }
+            }
+
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+
+            for(i = 1; i <= columns.size(); i++){
+                preparedStatement.setString(i, tableItem.getFields().get(i-1));
+            }
+
+            preparedStatement.executeUpdate();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            db.setErrorMessage(e.getMessage());
+            return false;
+        }
+        return true;
     }
 }

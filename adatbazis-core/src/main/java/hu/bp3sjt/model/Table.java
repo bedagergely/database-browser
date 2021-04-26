@@ -7,10 +7,10 @@ import java.util.List;
 
 public class Table {
 
-    private StringProperty name = new SimpleStringProperty(this, "name");
-    private ObjectProperty<DataBase> parent = new SimpleObjectProperty<>(this, "parent");
-    private ObjectProperty<ObservableList<Column>> columns = new SimpleObjectProperty<>(this, "columns");
-    private StringProperty schema = new SimpleStringProperty(this, "schema");
+    private final StringProperty name = new SimpleStringProperty(this, "name");
+    private final ObjectProperty<DataBase> parent = new SimpleObjectProperty<>(this, "parent");
+    private final ObjectProperty<ObservableList<Column>> columns = new SimpleObjectProperty<>(this, "columns");
+    private final StringProperty schema = new SimpleStringProperty(this, "schema");
 
     public String getName() {
         return name.get();

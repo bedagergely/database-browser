@@ -6,7 +6,7 @@ import javafx.collections.ObservableList;
 
 public class TableItem {
 
-    private ObjectProperty<Table> parent = new SimpleObjectProperty<>(this, "parent");
+    private final ObjectProperty<Table> parent = new SimpleObjectProperty<>(this, "parent");
     private ObservableList<String> fields = FXCollections.observableArrayList();
 
     public ObservableList<String> getFields() {

@@ -7,9 +7,9 @@ import javafx.beans.property.StringProperty;
 
 public class Column {
 
-    private StringProperty name = new SimpleStringProperty(this, "name");
-    private StringProperty dType = new SimpleStringProperty(this, "dType");
-    private IntegerProperty index = new SimpleIntegerProperty(this, "index");
+    private final StringProperty name = new SimpleStringProperty(this, "name");
+    private final StringProperty dType = new SimpleStringProperty(this, "dType");
+    private final IntegerProperty index = new SimpleIntegerProperty(this, "index");
 
     public int getIndex() {
         return index.get();
