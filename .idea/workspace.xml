@@ -6,9 +6,11 @@
   <component name="ChangeListManager">
     <list default="true" id="cb0baddc-a95f-4a16-9658-32503fd48fff" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/adatbazis-core/src/main/java/hu/bp3sjt/dao/DataBaseDAO.java" beforeDir="false" afterPath="$PROJECT_DIR$/adatbazis-core/src/main/java/hu/bp3sjt/dao/DataBaseDAO.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/adatbazis-core/src/main/java/hu/bp3sjt/dao/DataBaseDaoImp.java" beforeDir="false" afterPath="$PROJECT_DIR$/adatbazis-core/src/main/java/hu/bp3sjt/dao/DataBaseDaoImp.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/adatbazis-core/src/main/java/hu/bp3sjt/model/DataBase.java" beforeDir="false" afterPath="$PROJECT_DIR$/adatbazis-core/src/main/java/hu/bp3sjt/model/DataBase.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/adatbazis-desktop/src/main/java/hu/bp3sjt/App.java" beforeDir="false" afterPath="$PROJECT_DIR$/adatbazis-desktop/src/main/java/hu/bp3sjt/App.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/adatbazis-desktop/src/main/java/hu/bp3sjt/controller/MainWindowController.java" beforeDir="false" afterPath="$PROJECT_DIR$/adatbazis-desktop/src/main/java/hu/bp3sjt/controller/MainWindowController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/adatbazis-desktop/src/main/resources/fxml/main_window.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/adatbazis-desktop/src/main/resources/fxml/main_window.fxml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

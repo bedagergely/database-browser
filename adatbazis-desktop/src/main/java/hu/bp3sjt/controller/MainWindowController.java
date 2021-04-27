@@ -20,17 +20,18 @@ import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.TextAlignment;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.net.URL;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -69,7 +70,7 @@ public class MainWindowController implements Initializable {
     public void onOpenDataBase(ActionEvent actionEvent) {
         FileChooser fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Database files", "*.db"));
-        File selectedFile = fileChooser.showOpenDialog(null);
+        File selectedFile = fileChooser.showOpenDialog(App.getStage());
         if(selectedFile != null){
             dataBase = new DataBase();
             dataBase.setUrl(selectedFile.getAbsolutePath());
@@ -182,45 +183,62 @@ public class MainWindowController implements Initializable {
 
         VBox bottomVbox = new VBox();
         TextArea sqlText = new TextArea();
+        sqlText.setPrefRowCount(6);
 
-        bottomVbox.getChildren().add(sqlText);
+        Button run = new Button("Execute");
+        run.minWidthProperty().bind(sqlText.widthProperty());
+        run.setTextAlignment(TextAlignment.JUSTIFY);
+        run.setStyle("-fx-background-color: #00ff00; -fx-font-size: 1.4em; -fx-border-color: #000000; -fx-border-width: 1px");
+        run.setOnMouseExited(e->{run.setStyle("-fx-background-color: #00ff00; -fx-font-size: 1.4em; -fx-border-color: #000000; -fx-border-width: 1px");});
+        run.setOnMouseEntered(e->{run.setStyle("-fx-background-color: #00aa00; -fx-font-size: 1.4em; -fx-border-color: #000000; -fx-border-width: 1px");});
+
+
+        bottomVbox.getChildren().addAll(sqlText, run);
         borderPane.setBottom(bottomVbox);
 
-        sqlText.addEventHandler(KeyEvent.KEY_PRESSED, keyEvent -> {
-            if(dataBase != null && keyEvent.getCode() == KeyCode.F5){
+        run.setOnAction(actionEvent1 -> {
+            if(dataBase != null){
                 columnsTableView.getItems().removeAll(columnsTableView.getItems());
                 columnsTableView.getColumns().removeAll(columnsTableView.getColumns());
-               ResultSet resultSet = dao.executeSQL(dataBase, sqlText.getText());
-               if(resultSet == null){
-                   showDataBaseError();
-               }else{
-                   try{
-                       ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
-                       int columnCount = resultSetMetaData.getColumnCount();
-                       List<String> columnNames = FXCollections.observableArrayList();
-                       for(int i = 1; i <= columnCount; i++){
-                           String cname = resultSetMetaData.getColumnName(i);
-                           columnNames.add(cname);
-                       }
+                ResultSet resultSet = dao.executeSQL(dataBase, sqlText.getText());
+                if(resultSet == null){
+                    showDataBaseError();
+                }else{
+                    try{
+                        ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
+                        int columnCount = resultSetMetaData.getColumnCount();
+                        List<String> columnNames = FXCollections.observableArrayList();
+                        for(int i = 1; i <= columnCount; i++){
+                            String cname = resultSetMetaData.getColumnName(i);
+                            columnNames.add(cname);
+                        }
 
-                       for(int i = 0; i < columnCount; i++){
-                           TableColumn tableColumn = new TableColumn<TableItem, String>(columnNames.get(i));
-                           tableColumn.setMinWidth(80);
-                           final int index = i;
-                           tableColumn.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<TableItem, String>, ObservableValue<String>>() {
-                               @Override
-                               public ObservableValue call(TableColumn.CellDataFeatures param) {
-                                   return new SimpleStringProperty(((TableItem)param.getValue()).getFields().get(index));
-                               }
-                           });
-                           columnsTableView.getColumns().add(tableColumn);
-                       }
+                        for(int i = 0; i < columnCount; i++){
+                            TableColumn tableColumn = new TableColumn<TableItem, String>(columnNames.get(i));
+                            tableColumn.setMinWidth(80);
+                            final int index = i;
+                            tableColumn.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<TableItem, String>, ObservableValue<String>>() {
+                                @Override
+                                public ObservableValue call(TableColumn.CellDataFeatures param) {
+                                    return new SimpleStringProperty(((TableItem)param.getValue()).getFields().get(index));
+                                }
+                            });
+                            columnsTableView.getColumns().add(tableColumn);
+                        }
 
-                       resultSet.close();
-                   } catch (SQLException e) {
-                       e.printStackTrace();
-                   }
-               }
+                        while(resultSet.next()){
+                            TableItem t = new TableItem();
+                            for(int i = 1; i <= columnCount; i++){
+                                t.getFields().add(resultSet.getString(i));
+                            }
+                            columnsTableView.getItems().add(t);
+                        }
+
+                        resultSet.close();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                }
             }
         });
     }
@@ -390,8 +408,23 @@ public class MainWindowController implements Initializable {
 
     private void showDataBaseError(){
         Alert alert = new Alert(Alert.AlertType.ERROR,  null, ButtonType.OK);
-        alert.setTitle("SQL ERROR");
-        alert.setHeaderText(dataBase.getErrorMessage());
+        switch (dataBase.getErrorCode()){
+            case 101:
+                alert.setTitle("SQL");
+                alert.setHeaderText("There is no returned data");
+                alert.setAlertType(Alert.AlertType.INFORMATION);
+                break;
+            case 4242:
+                alert.setTitle("SQL");
+                alert.setHeaderText(dataBase.getErrorMessage());
+                alert.setAlertType(Alert.AlertType.INFORMATION);
+                break;
+            default:
+                alert.setTitle("SQL ERROR");
+                alert.setHeaderText(dataBase.getErrorMessage());
+                alert.setContentText(String.format("Error code: %d", dataBase.getErrorCode()));
+        }
+
         alert.showAndWait();
     }
 
@@ -399,5 +432,24 @@ public class MainWindowController implements Initializable {
         List<Table> tables = dao.findAllTables(dataBase);
         dataBase.setTables(FXCollections.observableArrayList(tables));
         tableListView.itemsProperty().bind(dataBase.tablesProperty());
+    }
+
+    public void exportTables(ActionEvent actionEvent) {
+        if(dataBase == null) return;
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setInitialFileName(String.format("%s.db", dataBase.getName().replaceFirst(".db$", "")));
+        fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("Database files (*.db)","*.db"),
+                new FileChooser.ExtensionFilter("SQL files (*.sql)", "*.sql"));
+        File selectedFile = fileChooser.showSaveDialog(App.getStage());
+
+        if(selectedFile != null){
+            try(PrintWriter printWriter = new PrintWriter(selectedFile)){
+                dataBase.getTables().forEach(table -> {
+                    printWriter.println(table.getSchema());
+                });
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

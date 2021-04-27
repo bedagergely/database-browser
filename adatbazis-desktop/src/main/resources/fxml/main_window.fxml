@@ -16,6 +16,7 @@
             <items>
                   <MenuItem mnemonicParsing="false" onAction="#onOpenDataBase" text="Open database" />
                   <MenuItem mnemonicParsing="false" onAction="#onCloseDataBase" text="Close database" />
+                  <MenuItem mnemonicParsing="false" onAction="#exportTables" text="Export database" />
               <MenuItem mnemonicParsing="false" onAction="#onExit" text="Exit" />
             </items>
           </Menu>
@@ -24,11 +25,6 @@
                   <MenuItem mnemonicParsing="false" onAction="#onNormalMenu" text="Normal" />
               <MenuItem mnemonicParsing="false" onAction="#onEditMenu" text="Edit" />
                   <MenuItem mnemonicParsing="false" onAction="#onSQLMenu" text="SQL" />
-            </items>
-          </Menu>
-          <Menu mnemonicParsing="false" text="Help">
-            <items>
-              <MenuItem mnemonicParsing="false" text="About" />
             </items>
           </Menu>
         </menus>

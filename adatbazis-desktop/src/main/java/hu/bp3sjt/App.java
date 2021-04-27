@@ -42,4 +42,8 @@ public class App extends Application {
     public static void setStageTitle(String name){
         stage.setTitle(name);
     }
+
+    public static Stage getStage(){
+        return stage;
+    }
 }

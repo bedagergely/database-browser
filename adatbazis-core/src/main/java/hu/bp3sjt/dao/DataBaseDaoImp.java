@@ -135,6 +135,7 @@ public class DataBaseDaoImp implements DataBaseDAO{
         } catch (SQLException e) {
             e.printStackTrace();
             db.setErrorMessage(e.getMessage());
+            db.setErrorCode(e.getErrorCode());
             return false;
         }
         return true;
@@ -203,6 +204,7 @@ public class DataBaseDaoImp implements DataBaseDAO{
         } catch (SQLException e) {
             e.printStackTrace();
             db.setErrorMessage(e.getMessage());
+            db.setErrorCode(e.getErrorCode());
             return false;
         }
         return true;
@@ -213,15 +215,25 @@ public class DataBaseDaoImp implements DataBaseDAO{
         try{
             Connection connection = DriverManager.getConnection(db.getUrl());
             Statement statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery(sql);
+            ResultSet resultSet;
+
+            if(sql.startsWith("INSERT") || sql.startsWith("UPDATE") || sql.startsWith("DELETE") ||
+            sql.startsWith("insert") || sql.startsWith("update") || sql.startsWith("delete")){
+                int ar = statement.executeUpdate(sql);
+                SQLException sqlException = new SQLException(String.format("Number of affected rows: %d", ar), "Succes", 4242);
+                throw  sqlException;
+            }else {
+                resultSet = statement.executeQuery(sql);
+            }
             return resultSet;
         } catch (SQLException e) {
-            if(e.getErrorCode() == 101){
+            if(e.getErrorCode() == 101 || e.getErrorCode() == 4242){
                 //No resultSet
             }else {
                 e.printStackTrace();
             }
             db.setErrorMessage(e.getMessage());
+            db.setErrorCode(e.getErrorCode());
             return null;
         }
     }

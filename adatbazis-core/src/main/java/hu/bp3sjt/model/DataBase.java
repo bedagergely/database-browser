@@ -1,9 +1,6 @@
 package hu.bp3sjt.model;
 
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
+import javafx.beans.property.*;
 import javafx.collections.ObservableList;
 
 public class DataBase {
@@ -12,6 +9,19 @@ public class DataBase {
     private final StringProperty name = new SimpleStringProperty(this, "name");
     private final ObjectProperty<ObservableList<Table>> tables = new SimpleObjectProperty<>(this, "tables");
     private final StringProperty errorMessage = new SimpleStringProperty(this, "errorMessage");
+    private final IntegerProperty errorCode = new SimpleIntegerProperty(this, "errorCode");
+
+    public int getErrorCode() {
+        return errorCode.get();
+    }
+
+    public IntegerProperty errorCodeProperty() {
+        return errorCode;
+    }
+
+    public void setErrorCode(int errorCode) {
+        this.errorCode.set(errorCode);
+    }
 
     public String getErrorMessage() {
         return errorMessage.get();
