@@ -2,4 +2,8 @@
 /adatbazis-core/target/
 /adatbazis-desktop/target/
 /adatbazis-web/target/
+<<<<<<< HEAD
 /.idea
+=======
+/.idea
+>>>>>>> b3cce3b4feaea7ec5db3861e684dc7a75fc6bffe
