@@ -438,8 +438,7 @@ public class MainWindowController implements Initializable {
         if(dataBase == null) return;
         FileChooser fileChooser = new FileChooser();
         fileChooser.setInitialFileName(String.format("%s.db", dataBase.getName().replaceFirst(".db$", "")));
-        fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("Database files (*.db)","*.db"),
-                new FileChooser.ExtensionFilter("SQL files (*.sql)", "*.sql"));
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("SQL files (*.sql)", "*.sql"));
         File selectedFile = fileChooser.showSaveDialog(App.getStage());
 
         if(selectedFile != null){

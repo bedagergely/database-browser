@@ -15,6 +15,18 @@ public class DataBaseDaoImp implements DataBaseDAO{
 
     private static final String SELECT_ALL_ITEMS = "SELECT * FROM %s";
     private static final String FIND_TABLE_SCHEMA = "SELECT * FROM sqlite_schema WHERE type='table' AND name=?";
+    private static boolean classIsLoaded = false;
+
+    public DataBaseDaoImp(){
+        if (!classIsLoaded) {
+            try {
+                Class.forName("org.sqlite.JDBC");
+                classIsLoaded = true;
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 
     @Override
     public List<Table> findAllTables(DataBase db) {

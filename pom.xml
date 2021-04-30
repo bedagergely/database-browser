@@ -11,6 +11,7 @@
     <modules>
         <module>adatbazis-core</module>
         <module>adatbazis-desktop</module>
+        <module>adatbazis-web</module>
     </modules>
 
     <properties>
