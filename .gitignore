@@ -1,4 +1,5 @@
 # Project exclude paths
 /adatbazis-core/target/
 /adatbazis-desktop/target/
+/adatbazis-web/target/
 /.idea
