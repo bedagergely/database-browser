@@ -2,7 +2,6 @@ package hu.bp3sjt;
 
 import hu.bp3sjt.dao.DataBaseDaoImp;
 import hu.bp3sjt.model.DataBase;
-
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -18,6 +17,7 @@ import java.util.Vector;
         maxRequestSize = 1024 * 1024 * 5 * 5 // 25 MB
 )
 public class DatabaseUpload extends HttpServlet {
+
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {

@@ -22,56 +22,60 @@
         DataBaseDaoImp dao = (DataBaseDaoImp) application.getAttribute("dao");
     %>
     <title>database</title>
+    <link rel="stylesheet" href="../css/pages.css">
 </head>
 <body>
-<a href="../index.jsp">Upload new File</a>
+<div class="centered">
+    <a href="../index.jsp">Upload new File</a>
     <div>
         <%
             String view = request.getParameter("view");
             String tableName = request.getParameter("tables");
             if(view == null) view = "";
 
-          switch(view){
-              case "1":
-                  Table t = new Table();
-                  t.setName(tableName);
-                  List<Column> columns = dao.findAllColumns(db, t);
-                  t.setColumns(FXCollections.observableArrayList(columns));
-                  List<TableItem> rows = dao.findAllItems(db, t);
-                  //table view
-                  //teable header
-                  out.print("<table>\n" +
-                          "  <tr>");
-                  //columns
-                  for (Column c: columns){
-                      out.print(String.format("<th>%s</th>", c.getName()));
-                  }
+            switch(view){
+                case "1":
+                    Table t = new Table();
+                    t.setName(tableName);
+                    List<Column> columns = dao.findAllColumns(db, t);
+                    t.setColumns(FXCollections.observableArrayList(columns));
+                    List<TableItem> rows = dao.findAllItems(db, t);
+                    //table view
+                    out.print(String.format("</br>Table: %s</br>", tableName));
+                    //teable header
+                    out.print("<table>\n" +
+                            "  <tr>");
+                      //columns
+                    for (Column c: columns){
+                        out.print(String.format("<th>%s</th>", c.getName()));
+                    }
 
-                  out.print("</tr>");
-                  //rows
-                  for (TableItem row: rows){
-                      out.print("<tr>");
-                      for (String s: row.getFields()){
-                          out.print(String.format("<td>%s</td>", s));
-                      }
-                      out.print("</tr>");
-                  }
+                    out.print("</tr>");
+                    //rows
+                    for (TableItem row: rows){
+                        out.print("<tr>");
+                        for (String s: row.getFields()){
+                            out.print(String.format("<td>%s</td>", s));
+                        }
+                        out.print("</tr>");
+                    }
 
-                  //end table
-                  out.print("</table>");
-                  break;
-              case "2":
-                  //schema view
-                  out.print(String.format("</br>Table: %s</br>", tableName));
-                  Table t2 = new Table();
-                  t2.setName(tableName);
-                  out.print(dao.findTableScheme(db, t2).replaceAll(",", ",</br>"));
-                  break;
-              default:
-                  break;
-          }
-
+                    //end table
+                    out.print("</table>");
+                    break;
+                case "2":
+                    //schema view
+                    out.print(String.format("</br>Table: %s</br>", tableName));
+                    Table t2 = new Table();
+                    t2.setName(tableName);
+                    out.print(dao.findTableScheme(db, t2).replaceAll(",", ",</br>"));
+                    out.print("</br></br>");
+                    break;
+                default:
+                    break;
+            }
         %>
+
     </div>
     <%
         List<Table> tables = dao.findAllTables(db);
@@ -86,12 +90,13 @@
             %>
         </select>
         <br><br>
-        <input type="radio" id="table" name="view" value="1">
+        <input type="radio" id="table" name="view" value="1" checked>
         <label for="table">records</label><br>
         <input type="radio" id="schema" name="view" value="2">
         <label for="schema">schema</label><br>
         <input type="submit" value="Submit">
         <br><br>
     </form>
+</div>
 </body>
 </html>

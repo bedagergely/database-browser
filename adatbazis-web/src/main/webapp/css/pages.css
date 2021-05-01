@@ -1,0 +1,35 @@
+.centered {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+th, td {
+    text-align: left;
+    padding: 8px;
+}
+
+tr:nth-child(even){background-color: #f2f2f2}
+tr:nth-child(odd){background-color: white}
+
+th {
+    background-color: #4CAF50;
+    color: white;
+}
+
+body {
+    background: aliceblue;
+}
+
+#upload_file{
+    border: black 1px solid;
+    padding: 30px;
+    font-size: larger;
+}
+
