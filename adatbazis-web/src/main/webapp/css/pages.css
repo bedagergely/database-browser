@@ -8,10 +8,11 @@
 table {
     border-collapse: collapse;
     width: 100%;
+    overflow: scroll;
 }
 
 th, td {
-    text-align: left;
+    text-align: center;
     padding: 8px;
 }
 
@@ -31,5 +32,36 @@ body {
     border: black 1px solid;
     padding: 30px;
     font-size: larger;
+    background-color: beige;
+}
+
+#schema_div{
+    border: #4CAF50 5px solid;
+    margin: 10px;
+    padding-left: 10px;
+    padding-right: 10px;
+    background-color: #f2f2f2;
+    font-size: large;
+    font-weight: bolder;
+    line-height: 1.6;
+}
+
+#select_table{
+    font-size: large;
+    font-weight: bold;
+    line-height: 1.6;
+}
+
+input[type="submit"]{
+    background-color: #4CAF50;
+    border: none;
+    color: white;
+    padding: 10px 24px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 14px;
+    font-weight: bold;
+    border-radius: 50%;
 }
 

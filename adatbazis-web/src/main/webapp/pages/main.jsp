@@ -20,6 +20,7 @@
     <%
         DataBase db = (DataBase) application.getAttribute("db");
         DataBaseDaoImp dao = (DataBaseDaoImp) application.getAttribute("dao");
+        if (db == null || dao == null) response.sendRedirect("../index.jsp");
     %>
     <title>database</title>
     <link rel="stylesheet" href="../css/pages.css">
@@ -35,12 +36,16 @@
 
             switch(view){
                 case "1":
+                    //table view
+                    if (tableName == null){
+                        response.sendRedirect("../index.jsp");
+                        break;
+                    }
                     Table t = new Table();
                     t.setName(tableName);
                     List<Column> columns = dao.findAllColumns(db, t);
                     t.setColumns(FXCollections.observableArrayList(columns));
                     List<TableItem> rows = dao.findAllItems(db, t);
-                    //table view
                     out.print(String.format("</br>Table: %s</br>", tableName));
                     //teable header
                     out.print("<table>\n" +
@@ -65,11 +70,17 @@
                     break;
                 case "2":
                     //schema view
+                    if (tableName == null){
+                        response.sendRedirect("../index.jsp");
+                        break;
+                    }
+                    out.print("<div id=\"schema_div\">");
                     out.print(String.format("</br>Table: %s</br>", tableName));
                     Table t2 = new Table();
                     t2.setName(tableName);
                     out.print(dao.findTableScheme(db, t2).replaceAll(",", ",</br>"));
                     out.print("</br></br>");
+                    out.print("</div>");
                     break;
                 default:
                     break;
@@ -80,23 +91,27 @@
     <%
         List<Table> tables = dao.findAllTables(db);
     %>
-    <form action="main.jsp" method="post">
-        <label for="tables">Choose a table:</label>
-        <select name="tables" id="tables">
-            <%
-                for (Table t: tables) {
-                    out.print(String.format("<option value=\"%s\">%s</option>", t.getName(), t.getName()));
-                }
-            %>
-        </select>
-        <br><br>
-        <input type="radio" id="table" name="view" value="1" checked>
-        <label for="table">records</label><br>
-        <input type="radio" id="schema" name="view" value="2">
-        <label for="schema">schema</label><br>
-        <input type="submit" value="Submit">
-        <br><br>
-    </form>
+    <div id="select_table">
+        <form action="main.jsp" method="post">
+            <label for="tables">Choose a table:</label>
+            <select name="tables" id="tables">
+                <%
+                    String tbl = request.getParameter("tables");
+                    if(tbl == null) tbl = "";
+                    for (Table t: tables) {
+                        out.print(String.format("<option value=\"%s\" %s>%s</option>", t.getName(), (tbl.equals(t.getName()) ? "selected" : ""), t.getName()));
+                    }
+                %>
+            </select>
+            <br>
+            <input type="radio" id="table" name="view" value="1" <%if(view.equals("1")) out.print("checked"); %>>
+            <label for="table">records</label><br>
+            <input type="radio" id="schema" name="view" value="2" <%if(view.equals("2")) out.print("checked"); %>>
+            <label for="schema">schema</label><br>
+            <input type="submit" value="Select">
+            <br><br>
+        </form>
+    </div>
 </div>
 </body>
 </html>
